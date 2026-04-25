@@ -13,13 +13,11 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route */}
         <Route
           path="/"
           element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Auth />}
         />
 
-        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -38,7 +36,6 @@ function App() {
           }
         />
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

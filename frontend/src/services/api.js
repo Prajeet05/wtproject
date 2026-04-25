@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -26,7 +26,6 @@ axiosInstance.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';
@@ -38,8 +37,8 @@ axiosInstance.interceptors.response.use(
 export const authService = {
   login: (email, password) =>
     axiosInstance.post('/auth/login', { email, password }),
-  register: (name, email, password) =>
-    axiosInstance.post('/auth/register', { name, email, password })
+  register: (name, email, password, confirmPassword) =>
+    axiosInstance.post('/auth/register', { name, email, password, confirmPassword })
 };
 
 export const slotService = {
@@ -58,6 +57,8 @@ export const slotService = {
 };
 
 export const bookingService = {
+  bookSlot: (bookingData) =>
+    axiosInstance.post('/bookings', bookingData),
   getUserBookings: () =>
     axiosInstance.get('/bookings/user'),
   getAllBookings: () =>

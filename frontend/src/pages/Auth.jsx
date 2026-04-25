@@ -35,7 +35,14 @@ export default function Auth() {
 
     try {
       if (isLoginMode) {
-        // Login
+        // Login - Validate email and password
+        if (!formData.email || !formData.password) {
+          setMessageType('error');
+          setMessage('✗ Please provide email and password');
+          setLoading(false);
+          return;
+        }
+
         const response = await authService.login(
           formData.email,
           formData.password
@@ -45,13 +52,27 @@ export default function Auth() {
           login(response.user, response.token);
           setMessageType('success');
           setMessage('✓ Login successful! Redirecting...');
-          setTimeout(() => navigate('/dashboard'), 1000);
+          setTimeout(() => navigate(response.user.isAdmin ? '/admin' : '/dashboard'), 1000);
         } else {
           setMessageType('error');
           setMessage('✗ ' + response.message);
         }
       } else {
-        // Register
+        // Register - Validate all fields
+        if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+          setMessageType('error');
+          setMessage('✗ Please fill in all fields');
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          setMessageType('error');
+          setMessage('✗ Password must be at least 6 characters');
+          setLoading(false);
+          return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
           setMessageType('error');
           setMessage('✗ Passwords do not match');
@@ -62,7 +83,8 @@ export default function Auth() {
         const response = await authService.register(
           formData.name,
           formData.email,
-          formData.password
+          formData.password,
+          formData.confirmPassword
         );
 
         if (response.success) {
@@ -85,7 +107,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="auth-section active">
+    <div className="auth-container">
       <div className="auth-card">
         <h1>🅿️ Smart Parking</h1>
         <p className="subtitle">{isLoginMode ? 'Login to your account' : 'Create your account'}</p>
@@ -164,7 +186,7 @@ export default function Auth() {
 
         <p className="auth-switch">
           {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-          <a href="#" onClick={(e) => {
+          <a onClick={(e) => {
             e.preventDefault();
             setIsLoginMode(!isLoginMode);
             setFormData({ name: '', email: '', password: '', confirmPassword: '' });
